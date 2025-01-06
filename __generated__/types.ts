@@ -137,6 +137,16 @@ export type BooleanOperators = {
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type BooleanStructFieldConfig = StructField & {
+  __typename?: 'BooleanStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type Channel = Node & {
   __typename?: 'Channel';
   availableCurrencyCodes: Array<CurrencyCode>;
@@ -744,7 +754,7 @@ export type CustomField = {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type CustomFieldConfig = BooleanCustomFieldConfig | DateTimeCustomFieldConfig | FloatCustomFieldConfig | IntCustomFieldConfig | LocaleStringCustomFieldConfig | LocaleTextCustomFieldConfig | RelationCustomFieldConfig | StringCustomFieldConfig | TextCustomFieldConfig;
+export type CustomFieldConfig = BooleanCustomFieldConfig | DateTimeCustomFieldConfig | FloatCustomFieldConfig | IntCustomFieldConfig | LocaleStringCustomFieldConfig | LocaleTextCustomFieldConfig | RelationCustomFieldConfig | StringCustomFieldConfig | StructCustomFieldConfig | TextCustomFieldConfig;
 
 export type Customer = Node & {
   __typename?: 'Customer';
@@ -865,6 +875,23 @@ export type DateTimeCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
+/**
+ * Expects the same validation formats as the `<input type="datetime-local">` HTML element.
+ * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#Additional_attributes
+ */
+export type DateTimeStructFieldConfig = StructField & {
+  __typename?: 'DateTimeStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  max?: Maybe<Scalars['String']['output']>;
+  min?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  step?: Maybe<Scalars['Int']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type DeletionResponse = {
   __typename?: 'DeletionResponse';
   message?: Maybe<Scalars['String']['output']>;
@@ -912,6 +939,7 @@ export enum ErrorCode {
   NEGATIVE_QUANTITY_ERROR = 'NEGATIVE_QUANTITY_ERROR',
   NOT_VERIFIED_ERROR = 'NOT_VERIFIED_ERROR',
   NO_ACTIVE_ORDER_ERROR = 'NO_ACTIVE_ORDER_ERROR',
+  ORDER_INTERCEPTOR_ERROR = 'ORDER_INTERCEPTOR_ERROR',
   ORDER_LIMIT_ERROR = 'ORDER_LIMIT_ERROR',
   ORDER_MODIFICATION_ERROR = 'ORDER_MODIFICATION_ERROR',
   ORDER_PAYMENT_STATE_ERROR = 'ORDER_PAYMENT_STATE_ERROR',
@@ -1102,6 +1130,19 @@ export type FloatCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
+export type FloatStructFieldConfig = StructField & {
+  __typename?: 'FloatStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  max?: Maybe<Scalars['Float']['output']>;
+  min?: Maybe<Scalars['Float']['output']>;
+  name: Scalars['String']['output'];
+  step?: Maybe<Scalars['Float']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type Fulfillment = Node & {
   __typename?: 'Fulfillment';
   createdAt: Scalars['DateTime']['output'];
@@ -1142,6 +1183,7 @@ export type GuestCheckoutError = ErrorResult & {
 export type HistoryEntry = Node & {
   __typename?: 'HistoryEntry';
   createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
   data: Scalars['JSON']['output'];
   id: Scalars['ID']['output'];
   type: HistoryEntryType;
@@ -1280,6 +1322,19 @@ export type IntCustomFieldConfig = CustomField & {
   nullable?: Maybe<Scalars['Boolean']['output']>;
   readonly?: Maybe<Scalars['Boolean']['output']>;
   requiresPermission?: Maybe<Array<Permission>>;
+  step?: Maybe<Scalars['Int']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type IntStructFieldConfig = StructField & {
+  __typename?: 'IntStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  max?: Maybe<Scalars['Int']['output']>;
+  min?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
   step?: Maybe<Scalars['Int']['output']>;
   type: Scalars['String']['output'];
   ui?: Maybe<Scalars['JSON']['output']>;
@@ -1669,7 +1724,7 @@ export type MissingPasswordError = ErrorResult & {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  /** Adds an item to the order. If custom fields are defined on the OrderLine entity, a third argument 'customFields' will be available. */
+  /** Adds an item to the Order. If custom fields are defined on the OrderLine entity, a third argument 'customFields' will be available. */
   addItemToOrder: UpdateOrderItemsResult;
   /** Add a Payment to the Order */
   addPaymentToOrder: AddPaymentToOrderResult;
@@ -1730,11 +1785,11 @@ export type Mutation = {
   resetPassword: ResetPasswordResult;
   /** Set the Customer for the Order. Required only if the Customer is not currently logged in */
   setCustomerForOrder: SetCustomerForOrderResult;
-  /** Sets the billing address for this order */
+  /** Sets the billing address for the active Order */
   setOrderBillingAddress: ActiveOrderResult;
-  /** Allows any custom fields to be set for the active order */
+  /** Allows any custom fields to be set for the active Order */
   setOrderCustomFields: ActiveOrderResult;
-  /** Sets the shipping address for this order */
+  /** Sets the shipping address for the active Order */
   setOrderShippingAddress: ActiveOrderResult;
   /**
    * Sets the shipping method by id, which can be obtained with the `eligibleShippingMethods` query.
@@ -1745,6 +1800,10 @@ export type Mutation = {
   setOrderShippingMethod: SetOrderShippingMethodResult;
   /** Transitions an Order to a new state. Valid next states can be found by querying `nextOrderStates` */
   transitionOrderToState?: Maybe<TransitionOrderToStateResult>;
+  /** Unsets the billing address for the active Order. Available since version 3.1.0 */
+  unsetOrderBillingAddress: ActiveOrderResult;
+  /** Unsets the shipping address for the active Order. Available since version 3.1.0 */
+  unsetOrderShippingAddress: ActiveOrderResult;
   /** Update an existing Customer */
   updateCustomer: Customer;
   /** Update an existing Address */
@@ -2069,6 +2128,14 @@ export type OrderFilterParameter = {
   updatedAt?: InputMaybe<DateOperators>;
 };
 
+/** Returned when an order operation is rejected by an OrderInterceptor method. */
+export type OrderInterceptorError = ErrorResult & {
+  __typename?: 'OrderInterceptorError';
+  errorCode: ErrorCode;
+  interceptorError: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
 /** Returned when the maximum order size limit has been reached. */
 export type OrderLimitError = ErrorResult & {
   __typename?: 'OrderLimitError';
@@ -2266,6 +2333,7 @@ export type Payment = Node & {
   __typename?: 'Payment';
   amount: Scalars['Money']['output'];
   createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
   errorMessage?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   metadata?: Maybe<Scalars['JSON']['output']>;
@@ -2933,6 +3001,7 @@ export type Refund = Node & {
   __typename?: 'Refund';
   adjustment: Scalars['Money']['output'];
   createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
   id: Scalars['ID']['output'];
   items: Scalars['Money']['output'];
   lines: Array<RefundLine>;
@@ -3006,7 +3075,7 @@ export type RelationCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type RemoveOrderItemsResult = Order | OrderModificationError;
+export type RemoveOrderItemsResult = Order | OrderInterceptorError | OrderModificationError;
 
 export type RequestPasswordResetResult = NativeAuthStrategyError | Success;
 
@@ -3109,6 +3178,7 @@ export type SetOrderShippingMethodResult = IneligibleShippingMethodError | NoAct
 
 export type ShippingLine = {
   __typename?: 'ShippingLine';
+  customFields?: Maybe<Scalars['JSON']['output']>;
   discountedPrice: Scalars['Money']['output'];
   discountedPriceWithTax: Scalars['Money']['output'];
   discounts: Array<Discount>;
@@ -3214,6 +3284,45 @@ export type StringOperators = {
   regex?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type StringStructFieldConfig = StructField & {
+  __typename?: 'StringStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  length?: Maybe<Scalars['Int']['output']>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  options?: Maybe<Array<StringFieldOption>>;
+  pattern?: Maybe<Scalars['String']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type StructCustomFieldConfig = CustomField & {
+  __typename?: 'StructCustomFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  fields: Array<StructFieldConfig>;
+  internal?: Maybe<Scalars['Boolean']['output']>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  nullable?: Maybe<Scalars['Boolean']['output']>;
+  readonly?: Maybe<Scalars['Boolean']['output']>;
+  requiresPermission?: Maybe<Array<Permission>>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type StructField = {
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list?: Maybe<Scalars['Boolean']['output']>;
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type StructFieldConfig = BooleanStructFieldConfig | DateTimeStructFieldConfig | FloatStructFieldConfig | IntStructFieldConfig | StringStructFieldConfig | TextStructFieldConfig;
+
 /** Indicates that an operation succeeded, where we do not want to return any more specific information. */
 export type Success = {
   __typename?: 'Success';
@@ -3297,6 +3406,16 @@ export type TextCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
+export type TextStructFieldConfig = StructField & {
+  __typename?: 'TextStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type TransitionOrderToStateResult = Order | OrderStateTransitionError;
 
 /**
@@ -3338,7 +3457,7 @@ export type UpdateOrderInput = {
   customFields?: InputMaybe<Scalars['JSON']['input']>;
 };
 
-export type UpdateOrderItemsResult = InsufficientStockError | NegativeQuantityError | Order | OrderLimitError | OrderModificationError;
+export type UpdateOrderItemsResult = InsufficientStockError | NegativeQuantityError | Order | OrderInterceptorError | OrderLimitError | OrderModificationError;
 
 export type User = Node & {
   __typename?: 'User';
@@ -3385,20 +3504,213 @@ export type Zone = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-export type GetProductQueryVariables = Exact<{ [key: string]: never; }>;
+export type RegisterCustomerAccountMutationVariables = Exact<{
+  input: RegisterCustomerInput;
+}>;
 
 
-export type GetProductQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, name: string }> } };
+export type RegisterCustomerAccountMutation = { __typename?: 'Mutation', registerCustomerAccount: { __typename?: 'MissingPasswordError', errorCode: ErrorCode, message: string } | { __typename?: 'NativeAuthStrategyError', errorCode: ErrorCode, message: string } | { __typename?: 'PasswordValidationError', errorCode: ErrorCode, message: string, validationErrorMessage: string } | { __typename?: 'Success', success: boolean } };
+
+export type Log_InMutationVariables = Exact<{
+  username: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  rememberMe?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
 
 
-export const GetProductDocument = gql`
-    query GetProduct {
+export type Log_InMutation = { __typename?: 'Mutation', login: { __typename?: 'CurrentUser', id: string, identifier: string } | { __typename?: 'InvalidCredentialsError', errorCode: ErrorCode, message: string, authenticationError: string } | { __typename?: 'NativeAuthStrategyError' } | { __typename?: 'NotVerifiedError' } };
+
+export type Log_OutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type Log_OutMutation = { __typename?: 'Mutation', logout: { __typename?: 'Success', success: boolean } };
+
+export type GetProductsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProductsQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, name: string }> } };
+
+export type GetProductQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetProductQuery = { __typename?: 'Query', product?: { __typename?: 'Product', id: string, name: string, slug: string, description: string } | null };
+
+
+export const RegisterCustomerAccountDocument = gql`
+    mutation registerCustomerAccount($input: RegisterCustomerInput!) {
+  registerCustomerAccount(input: $input) {
+    ... on Success {
+      success
+    }
+    ... on MissingPasswordError {
+      errorCode
+      message
+    }
+    ... on PasswordValidationError {
+      errorCode
+      message
+      validationErrorMessage
+    }
+    ... on NativeAuthStrategyError {
+      errorCode
+      message
+    }
+  }
+}
+    `;
+export type RegisterCustomerAccountMutationFn = Apollo.MutationFunction<RegisterCustomerAccountMutation, RegisterCustomerAccountMutationVariables>;
+
+/**
+ * __useRegisterCustomerAccountMutation__
+ *
+ * To run a mutation, you first call `useRegisterCustomerAccountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRegisterCustomerAccountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [registerCustomerAccountMutation, { data, loading, error }] = useRegisterCustomerAccountMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useRegisterCustomerAccountMutation(baseOptions?: Apollo.MutationHookOptions<RegisterCustomerAccountMutation, RegisterCustomerAccountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterCustomerAccountMutation, RegisterCustomerAccountMutationVariables>(RegisterCustomerAccountDocument, options);
+      }
+export type RegisterCustomerAccountMutationHookResult = ReturnType<typeof useRegisterCustomerAccountMutation>;
+export type RegisterCustomerAccountMutationResult = Apollo.MutationResult<RegisterCustomerAccountMutation>;
+export type RegisterCustomerAccountMutationOptions = Apollo.BaseMutationOptions<RegisterCustomerAccountMutation, RegisterCustomerAccountMutationVariables>;
+export const Log_InDocument = gql`
+    mutation Log_In($username: String!, $password: String!, $rememberMe: Boolean) {
+  login(username: $username, password: $password, rememberMe: $rememberMe) {
+    ... on CurrentUser {
+      id
+      identifier
+    }
+    ... on InvalidCredentialsError {
+      errorCode
+      message
+      authenticationError
+    }
+  }
+}
+    `;
+export type Log_InMutationFn = Apollo.MutationFunction<Log_InMutation, Log_InMutationVariables>;
+
+/**
+ * __useLog_InMutation__
+ *
+ * To run a mutation, you first call `useLog_InMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLog_InMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logInMutation, { data, loading, error }] = useLog_InMutation({
+ *   variables: {
+ *      username: // value for 'username'
+ *      password: // value for 'password'
+ *      rememberMe: // value for 'rememberMe'
+ *   },
+ * });
+ */
+export function useLog_InMutation(baseOptions?: Apollo.MutationHookOptions<Log_InMutation, Log_InMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<Log_InMutation, Log_InMutationVariables>(Log_InDocument, options);
+      }
+export type Log_InMutationHookResult = ReturnType<typeof useLog_InMutation>;
+export type Log_InMutationResult = Apollo.MutationResult<Log_InMutation>;
+export type Log_InMutationOptions = Apollo.BaseMutationOptions<Log_InMutation, Log_InMutationVariables>;
+export const Log_OutDocument = gql`
+    mutation LOG_OUT {
+  logout {
+    success
+  }
+}
+    `;
+export type Log_OutMutationFn = Apollo.MutationFunction<Log_OutMutation, Log_OutMutationVariables>;
+
+/**
+ * __useLog_OutMutation__
+ *
+ * To run a mutation, you first call `useLog_OutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLog_OutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [logOutMutation, { data, loading, error }] = useLog_OutMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useLog_OutMutation(baseOptions?: Apollo.MutationHookOptions<Log_OutMutation, Log_OutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<Log_OutMutation, Log_OutMutationVariables>(Log_OutDocument, options);
+      }
+export type Log_OutMutationHookResult = ReturnType<typeof useLog_OutMutation>;
+export type Log_OutMutationResult = Apollo.MutationResult<Log_OutMutation>;
+export type Log_OutMutationOptions = Apollo.BaseMutationOptions<Log_OutMutation, Log_OutMutationVariables>;
+export const GetProductsDocument = gql`
+    query GetProducts {
   products {
     totalItems
     items {
       id
       name
     }
+  }
+}
+    `;
+
+/**
+ * __useGetProductsQuery__
+ *
+ * To run a query within a React component, call `useGetProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProductsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetProductsQuery(baseOptions?: Apollo.QueryHookOptions<GetProductsQuery, GetProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProductsQuery, GetProductsQueryVariables>(GetProductsDocument, options);
+      }
+export function useGetProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProductsQuery, GetProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProductsQuery, GetProductsQueryVariables>(GetProductsDocument, options);
+        }
+export function useGetProductsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetProductsQuery, GetProductsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetProductsQuery, GetProductsQueryVariables>(GetProductsDocument, options);
+        }
+export type GetProductsQueryHookResult = ReturnType<typeof useGetProductsQuery>;
+export type GetProductsLazyQueryHookResult = ReturnType<typeof useGetProductsLazyQuery>;
+export type GetProductsSuspenseQueryHookResult = ReturnType<typeof useGetProductsSuspenseQuery>;
+export type GetProductsQueryResult = Apollo.QueryResult<GetProductsQuery, GetProductsQueryVariables>;
+export const GetProductDocument = gql`
+    query GetProduct($id: ID!) {
+  product(id: $id) {
+    id
+    name
+    slug
+    description
   }
 }
     `;
@@ -3415,10 +3727,11 @@ export const GetProductDocument = gql`
  * @example
  * const { data, loading, error } = useGetProductQuery({
  *   variables: {
+ *      id: // value for 'id'
  *   },
  * });
  */
-export function useGetProductQuery(baseOptions?: Apollo.QueryHookOptions<GetProductQuery, GetProductQueryVariables>) {
+export function useGetProductQuery(baseOptions: Apollo.QueryHookOptions<GetProductQuery, GetProductQueryVariables> & ({ variables: GetProductQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetProductQuery, GetProductQueryVariables>(GetProductDocument, options);
       }

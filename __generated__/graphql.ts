@@ -140,6 +140,16 @@ export type BooleanOperators = {
   isNull?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type BooleanStructFieldConfig = StructField & {
+  __typename?: 'BooleanStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type Channel = Node & {
   __typename?: 'Channel';
   availableCurrencyCodes: Array<CurrencyCode>;
@@ -747,7 +757,7 @@ export type CustomField = {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type CustomFieldConfig = BooleanCustomFieldConfig | DateTimeCustomFieldConfig | FloatCustomFieldConfig | IntCustomFieldConfig | LocaleStringCustomFieldConfig | LocaleTextCustomFieldConfig | RelationCustomFieldConfig | StringCustomFieldConfig | TextCustomFieldConfig;
+export type CustomFieldConfig = BooleanCustomFieldConfig | DateTimeCustomFieldConfig | FloatCustomFieldConfig | IntCustomFieldConfig | LocaleStringCustomFieldConfig | LocaleTextCustomFieldConfig | RelationCustomFieldConfig | StringCustomFieldConfig | StructCustomFieldConfig | TextCustomFieldConfig;
 
 export type Customer = Node & {
   __typename?: 'Customer';
@@ -868,6 +878,23 @@ export type DateTimeCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
+/**
+ * Expects the same validation formats as the `<input type="datetime-local">` HTML element.
+ * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#Additional_attributes
+ */
+export type DateTimeStructFieldConfig = StructField & {
+  __typename?: 'DateTimeStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  max?: Maybe<Scalars['String']['output']>;
+  min?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  step?: Maybe<Scalars['Int']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type DeletionResponse = {
   __typename?: 'DeletionResponse';
   message?: Maybe<Scalars['String']['output']>;
@@ -915,6 +942,7 @@ export enum ErrorCode {
   NegativeQuantityError = 'NEGATIVE_QUANTITY_ERROR',
   NotVerifiedError = 'NOT_VERIFIED_ERROR',
   NoActiveOrderError = 'NO_ACTIVE_ORDER_ERROR',
+  OrderInterceptorError = 'ORDER_INTERCEPTOR_ERROR',
   OrderLimitError = 'ORDER_LIMIT_ERROR',
   OrderModificationError = 'ORDER_MODIFICATION_ERROR',
   OrderPaymentStateError = 'ORDER_PAYMENT_STATE_ERROR',
@@ -1105,6 +1133,19 @@ export type FloatCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
+export type FloatStructFieldConfig = StructField & {
+  __typename?: 'FloatStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  max?: Maybe<Scalars['Float']['output']>;
+  min?: Maybe<Scalars['Float']['output']>;
+  name: Scalars['String']['output'];
+  step?: Maybe<Scalars['Float']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type Fulfillment = Node & {
   __typename?: 'Fulfillment';
   createdAt: Scalars['DateTime']['output'];
@@ -1145,6 +1186,7 @@ export type GuestCheckoutError = ErrorResult & {
 export type HistoryEntry = Node & {
   __typename?: 'HistoryEntry';
   createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
   data: Scalars['JSON']['output'];
   id: Scalars['ID']['output'];
   type: HistoryEntryType;
@@ -1283,6 +1325,19 @@ export type IntCustomFieldConfig = CustomField & {
   nullable?: Maybe<Scalars['Boolean']['output']>;
   readonly?: Maybe<Scalars['Boolean']['output']>;
   requiresPermission?: Maybe<Array<Permission>>;
+  step?: Maybe<Scalars['Int']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type IntStructFieldConfig = StructField & {
+  __typename?: 'IntStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  max?: Maybe<Scalars['Int']['output']>;
+  min?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
   step?: Maybe<Scalars['Int']['output']>;
   type: Scalars['String']['output'];
   ui?: Maybe<Scalars['JSON']['output']>;
@@ -1672,7 +1727,7 @@ export type MissingPasswordError = ErrorResult & {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  /** Adds an item to the order. If custom fields are defined on the OrderLine entity, a third argument 'customFields' will be available. */
+  /** Adds an item to the Order. If custom fields are defined on the OrderLine entity, a third argument 'customFields' will be available. */
   addItemToOrder: UpdateOrderItemsResult;
   /** Add a Payment to the Order */
   addPaymentToOrder: AddPaymentToOrderResult;
@@ -1733,11 +1788,11 @@ export type Mutation = {
   resetPassword: ResetPasswordResult;
   /** Set the Customer for the Order. Required only if the Customer is not currently logged in */
   setCustomerForOrder: SetCustomerForOrderResult;
-  /** Sets the billing address for this order */
+  /** Sets the billing address for the active Order */
   setOrderBillingAddress: ActiveOrderResult;
-  /** Allows any custom fields to be set for the active order */
+  /** Allows any custom fields to be set for the active Order */
   setOrderCustomFields: ActiveOrderResult;
-  /** Sets the shipping address for this order */
+  /** Sets the shipping address for the active Order */
   setOrderShippingAddress: ActiveOrderResult;
   /**
    * Sets the shipping method by id, which can be obtained with the `eligibleShippingMethods` query.
@@ -1748,6 +1803,10 @@ export type Mutation = {
   setOrderShippingMethod: SetOrderShippingMethodResult;
   /** Transitions an Order to a new state. Valid next states can be found by querying `nextOrderStates` */
   transitionOrderToState?: Maybe<TransitionOrderToStateResult>;
+  /** Unsets the billing address for the active Order. Available since version 3.1.0 */
+  unsetOrderBillingAddress: ActiveOrderResult;
+  /** Unsets the shipping address for the active Order. Available since version 3.1.0 */
+  unsetOrderShippingAddress: ActiveOrderResult;
   /** Update an existing Customer */
   updateCustomer: Customer;
   /** Update an existing Address */
@@ -2072,6 +2131,14 @@ export type OrderFilterParameter = {
   updatedAt?: InputMaybe<DateOperators>;
 };
 
+/** Returned when an order operation is rejected by an OrderInterceptor method. */
+export type OrderInterceptorError = ErrorResult & {
+  __typename?: 'OrderInterceptorError';
+  errorCode: ErrorCode;
+  interceptorError: Scalars['String']['output'];
+  message: Scalars['String']['output'];
+};
+
 /** Returned when the maximum order size limit has been reached. */
 export type OrderLimitError = ErrorResult & {
   __typename?: 'OrderLimitError';
@@ -2269,6 +2336,7 @@ export type Payment = Node & {
   __typename?: 'Payment';
   amount: Scalars['Money']['output'];
   createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
   errorMessage?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   metadata?: Maybe<Scalars['JSON']['output']>;
@@ -2936,6 +3004,7 @@ export type Refund = Node & {
   __typename?: 'Refund';
   adjustment: Scalars['Money']['output'];
   createdAt: Scalars['DateTime']['output'];
+  customFields?: Maybe<Scalars['JSON']['output']>;
   id: Scalars['ID']['output'];
   items: Scalars['Money']['output'];
   lines: Array<RefundLine>;
@@ -3009,7 +3078,7 @@ export type RelationCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
-export type RemoveOrderItemsResult = Order | OrderModificationError;
+export type RemoveOrderItemsResult = Order | OrderInterceptorError | OrderModificationError;
 
 export type RequestPasswordResetResult = NativeAuthStrategyError | Success;
 
@@ -3112,6 +3181,7 @@ export type SetOrderShippingMethodResult = IneligibleShippingMethodError | NoAct
 
 export type ShippingLine = {
   __typename?: 'ShippingLine';
+  customFields?: Maybe<Scalars['JSON']['output']>;
   discountedPrice: Scalars['Money']['output'];
   discountedPriceWithTax: Scalars['Money']['output'];
   discounts: Array<Discount>;
@@ -3217,6 +3287,45 @@ export type StringOperators = {
   regex?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type StringStructFieldConfig = StructField & {
+  __typename?: 'StringStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  length?: Maybe<Scalars['Int']['output']>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  options?: Maybe<Array<StringFieldOption>>;
+  pattern?: Maybe<Scalars['String']['output']>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type StructCustomFieldConfig = CustomField & {
+  __typename?: 'StructCustomFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  fields: Array<StructFieldConfig>;
+  internal?: Maybe<Scalars['Boolean']['output']>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  nullable?: Maybe<Scalars['Boolean']['output']>;
+  readonly?: Maybe<Scalars['Boolean']['output']>;
+  requiresPermission?: Maybe<Array<Permission>>;
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type StructField = {
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list?: Maybe<Scalars['Boolean']['output']>;
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
+export type StructFieldConfig = BooleanStructFieldConfig | DateTimeStructFieldConfig | FloatStructFieldConfig | IntStructFieldConfig | StringStructFieldConfig | TextStructFieldConfig;
+
 /** Indicates that an operation succeeded, where we do not want to return any more specific information. */
 export type Success = {
   __typename?: 'Success';
@@ -3300,6 +3409,16 @@ export type TextCustomFieldConfig = CustomField & {
   ui?: Maybe<Scalars['JSON']['output']>;
 };
 
+export type TextStructFieldConfig = StructField & {
+  __typename?: 'TextStructFieldConfig';
+  description?: Maybe<Array<LocalizedString>>;
+  label?: Maybe<Array<LocalizedString>>;
+  list: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+  ui?: Maybe<Scalars['JSON']['output']>;
+};
+
 export type TransitionOrderToStateResult = Order | OrderStateTransitionError;
 
 /**
@@ -3341,7 +3460,7 @@ export type UpdateOrderInput = {
   customFields?: InputMaybe<Scalars['JSON']['input']>;
 };
 
-export type UpdateOrderItemsResult = InsufficientStockError | NegativeQuantityError | Order | OrderLimitError | OrderModificationError;
+export type UpdateOrderItemsResult = InsufficientStockError | NegativeQuantityError | Order | OrderInterceptorError | OrderLimitError | OrderModificationError;
 
 export type User = Node & {
   __typename?: 'User';
@@ -3388,10 +3507,42 @@ export type Zone = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-export type GetProductQueryVariables = Exact<{ [key: string]: never; }>;
+export type RegisterCustomerAccountMutationVariables = Exact<{
+  input: RegisterCustomerInput;
+}>;
 
 
-export type GetProductQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, name: string }> } };
+export type RegisterCustomerAccountMutation = { __typename?: 'Mutation', registerCustomerAccount: { __typename?: 'MissingPasswordError', errorCode: ErrorCode, message: string } | { __typename?: 'NativeAuthStrategyError', errorCode: ErrorCode, message: string } | { __typename?: 'PasswordValidationError', errorCode: ErrorCode, message: string, validationErrorMessage: string } | { __typename?: 'Success', success: boolean } };
+
+export type Log_InMutationVariables = Exact<{
+  username: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  rememberMe?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
 
 
-export const GetProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProduct"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<GetProductQuery, GetProductQueryVariables>;
+export type Log_InMutation = { __typename?: 'Mutation', login: { __typename?: 'CurrentUser', id: string, identifier: string } | { __typename?: 'InvalidCredentialsError', errorCode: ErrorCode, message: string, authenticationError: string } | { __typename?: 'NativeAuthStrategyError' } | { __typename?: 'NotVerifiedError' } };
+
+export type Log_OutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type Log_OutMutation = { __typename?: 'Mutation', logout: { __typename?: 'Success', success: boolean } };
+
+export type GetProductsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetProductsQuery = { __typename?: 'Query', products: { __typename?: 'ProductList', totalItems: number, items: Array<{ __typename?: 'Product', id: string, name: string }> } };
+
+export type GetProductQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetProductQuery = { __typename?: 'Query', product?: { __typename?: 'Product', id: string, name: string, slug: string, description: string } | null };
+
+
+export const RegisterCustomerAccountDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"registerCustomerAccount"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"RegisterCustomerInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"registerCustomerAccount"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Success"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MissingPasswordError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PasswordValidationError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"validationErrorMessage"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"NativeAuthStrategyError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]} as unknown as DocumentNode<RegisterCustomerAccountMutation, RegisterCustomerAccountMutationVariables>;
+export const Log_InDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Log_In"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"username"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"rememberMe"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"login"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"username"},"value":{"kind":"Variable","name":{"kind":"Name","value":"username"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}},{"kind":"Argument","name":{"kind":"Name","value":"rememberMe"},"value":{"kind":"Variable","name":{"kind":"Name","value":"rememberMe"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"CurrentUser"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"InvalidCredentialsError"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"errorCode"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"authenticationError"}}]}}]}}]}}]} as unknown as DocumentNode<Log_InMutation, Log_InMutationVariables>;
+export const Log_OutDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"LOG_OUT"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"logout"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"success"}}]}}]}}]} as unknown as DocumentNode<Log_OutMutation, Log_OutMutationVariables>;
+export const GetProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProducts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"products"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalItems"}},{"kind":"Field","name":{"kind":"Name","value":"items"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]}}]} as unknown as DocumentNode<GetProductsQuery, GetProductsQueryVariables>;
+export const GetProductDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetProduct"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"product"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"slug"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]} as unknown as DocumentNode<GetProductQuery, GetProductQueryVariables>;

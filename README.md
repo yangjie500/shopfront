@@ -44,3 +44,9 @@ npm install @apollo/client@latest @apollo/experimental-nextjs-app-support
 npm install --save-dev @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/typescript-react-apollo
 
 ```
+
+### Config Related
+
+```bash
+npm install @next/env
+```

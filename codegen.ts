@@ -1,16 +1,19 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
+import "./envConfig.ts";
 
 const config: CodegenConfig = {
-  schema: "http://localhost:4000/shop-api",
-  documents: ["lib/**/*.ts"],
   generates: {
     "__generated__/": {
+      schema: process.env.BACKEND_URL,
+      documents: ["graphql/shop-api/**/*.ts"],
       preset: "client",
       presetConfig: {
         gqlTagName: "gql",
       },
     },
     "__generated__/types.ts": {
+      schema: process.env.BACKEND_URL,
+      documents: ["graphql/shop-api/**/*.ts"],
       plugins: [
         "typescript",
         "typescript-operations",
